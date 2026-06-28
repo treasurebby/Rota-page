@@ -3,7 +3,11 @@ import { NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+
+  
 export async function POST(req: Request) {
+  console.log("API KEY:", process.env.RESEND_API_KEY);
+  
   const { name, email, message } = await req.json();
 
   if (!name || !email || !message) {
@@ -12,8 +16,8 @@ export async function POST(req: Request) {
 
   try {
     await resend.emails.send({
-      from: "Rota Contact <onboarding@resend.dev>", // swap with your domain email later
-      to: ["ehiomhentreasureruth@gmail.com"], // both of you get it
+      from: "Rota Contact <onboarding@resend.dev>",
+      to: ["ehiomhentreasureruth@gmail.com"],
       subject: `New message from ${name}`,
       html: `
         <p><strong>Name:</strong> ${name}</p>
@@ -24,6 +28,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.log("RESEND ERROR:", error);
     return NextResponse.json({ error: "Failed to send message." }, { status: 500 });
   }
 }
