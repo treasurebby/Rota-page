@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   try {
     await resend.emails.send({
       from: "Rota Contact <onboarding@resend.dev>", // swap with your domain email later
-      to: ["ehiomhentreasureruth@gmail.com", "tehiomhen.2304306@stu.cu.edu.ng"], // both of you get it
+      to: ["ehiomhentreasureruth@gmail.com"], // both of you get it
       subject: `New message from ${name}`,
       html: `
         <p><strong>Name:</strong> ${name}</p>
