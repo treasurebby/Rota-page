@@ -30,9 +30,11 @@ Each member of a savings group gets their own dedicated NUBAN (virtual account n
     `
   },
   {
-    id: "authentication",
-    title: "Authentication",
-    description: `Rota uses API key authentication. You get two key types from your dashboard:
+  id: "authentication",
+  title: "Authentication",
+  description: `Rota uses API key authentication. During early access, keys are issued on request — see below on how to get yours.
+
+Once issued, you receive two key types:
 
 * \`sk_live_...\` — secret key, server-side only, never expose in client code
 * \`pk_live_...\` — publishable key, safe for client-side use
@@ -40,10 +42,30 @@ Each member of a savings group gets their own dedicated NUBAN (virtual account n
 Every write request (\`POST\`, \`PUT\`) requires an \`X-Idempotency-Key\` header — a unique UUID you generate per request. Duplicate keys within 24 hours return the original response instead of re-executing, protecting against double provisioning or duplicate payouts on network retries.
 
 Keys are scoped per account. You cannot read or act on another account's cycles, participants, or ledger data.`,
-    requestHeaders: `Authorization: Bearer sk_live_xxxxxxxxxxxxxxxx
+  extraHtml: `
+    <!-- Get an API key -->
+    <div class="mt-6 p-5 rounded-xl border border-[#E4DEC9] bg-[#FAF8F5]">
+      <p class="text-xs font-mono uppercase tracking-wider text-[#8A8070] mb-2 font-bold">Get an API Key</p>
+      <p class="text-sm text-[#1A1A1A] leading-relaxed mb-4">
+        Rota is currently in early access. API keys are not self-serve yet — to request yours, reach out to the team with a brief description of your use case and we'll get you set up.
+      </p>
+      <a href="/contact" class="inline-flex items-center gap-2 px-4 py-2 bg-[#FF6B00] text-white text-sm font-bold rounded-lg hover:bg-[#E05E00] transition-colors">
+        Request early access →
+      </a>
+    </div>
+
+    <!-- Key scoping warning -->
+    <div class="mt-6 p-4 rounded-lg bg-orange-50 border border-[#FF6B00]/20">
+      <p class="text-xs font-mono uppercase tracking-wider text-[#FF6B00] mb-1 font-bold">⚠ Keep your secret key safe</p>
+      <p class="text-sm text-[#1A1A1A] leading-relaxed">
+        Never expose <code class="text-xs bg-[#F0EBE0] px-1.5 py-0.5 rounded font-mono">sk_live_...</code> in client-side code, public repos, or frontend bundles. If a key is compromised, contact <a href="mailto:dev@rota.dev" class="text-[#FF6B00] hover:underline">dev@rota.dev</a> immediately for a replacement.
+      </p>
+    </div>
+  `,
+  requestHeaders: `Authorization: Bearer sk_live_xxxxxxxxxxxxxxxx
 X-Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 Content-Type: application/json`
-  },
+},
   {
     id: "create-a-cycle",
     title: "Create a Cycle",
@@ -94,16 +116,46 @@ If a single participant fails provisioning (e.g. invalid BVN), Rota does not fai
   ]
 }`
   },
-  {
-    id: "get-a-cycle",
-    title: "Get a Cycle",
-    parent: "Cycles",
-    method: "GET",
-    endpoint: "/v1/ajo-cycles/{id}",
-    description: `Returns the current state and metadata of a cycle, including its status, pool value, frequency, and next settlement date.
-
-**Possible status values:** \`DRAFT\`, \`ACTIVE\`, \`CONTRIBUTING\`, \`OVERDUE\`, \`SETTLING\`, \`COMPLETED\``,
-    responseBody: `{
+ {
+  id: "get-a-cycle",
+  title: "Get a Cycle",
+  parent: "Cycles",
+  method: "GET",
+  endpoint: "/v1/ajo-cycles/{id}",
+  description: `Returns the current state and metadata of a cycle, including its status, pool value, frequency, and next settlement date.`,
+  extraHtml: `
+    <!-- Status values -->
+    <div class="mt-6">
+      <p class="text-xs font-mono uppercase tracking-wider text-[#8A8070] mb-3 font-bold">Cycle Status Values</p>
+      <div class="divide-y divide-[#E4DEC9] border border-[#E4DEC9] rounded-xl overflow-hidden">
+        <div class="flex items-start gap-4 px-4 py-3 bg-[#FAF8F5]">
+          <code class="text-xs font-mono text-[#FF6B00] bg-orange-50 px-2 py-0.5 rounded mt-0.5 shrink-0">DRAFT</code>
+          <p class="text-sm text-[#1A1A1A] leading-relaxed">Cycle has been created but account provisioning is still in progress. No contributions are accepted yet.</p>
+        </div>
+        <div class="flex items-start gap-4 px-4 py-3 bg-[#FAF8F5]">
+          <code class="text-xs font-mono text-[#FF6B00] bg-orange-50 px-2 py-0.5 rounded mt-0.5 shrink-0">ACTIVE</code>
+          <p class="text-sm text-[#1A1A1A] leading-relaxed">All NUBANs are provisioned and the cycle is open. Members can begin making contributions.</p>
+        </div>
+        <div class="flex items-start gap-4 px-4 py-3 bg-[#FAF8F5]">
+          <code class="text-xs font-mono text-[#FF6B00] bg-orange-50 px-2 py-0.5 rounded mt-0.5 shrink-0">CONTRIBUTING</code>
+          <p class="text-sm text-[#1A1A1A] leading-relaxed">The current contribution window is open and at least one member has paid. Pool is actively accumulating.</p>
+        </div>
+        <div class="flex items-start gap-4 px-4 py-3 bg-[#FAF8F5]">
+          <code class="text-xs font-mono text-[#FF6B00] bg-orange-50 px-2 py-0.5 rounded mt-0.5 shrink-0">OVERDUE</code>
+          <p class="text-sm text-[#1A1A1A] leading-relaxed">The contribution deadline passed without full pool funding. A <code class="text-xs bg-[#F0EBE0] px-1 py-0.5 rounded font-mono">cycle.overdue</code> webhook has been fired. The cycle is not closed — late contributions are still accepted.</p>
+        </div>
+        <div class="flex items-start gap-4 px-4 py-3 bg-[#FAF8F5]">
+          <code class="text-xs font-mono text-[#FF6B00] bg-orange-50 px-2 py-0.5 rounded mt-0.5 shrink-0">SETTLING</code>
+          <p class="text-sm text-[#1A1A1A] leading-relaxed">The pool is fully funded and disbursement to the current rotation beneficiary is in progress. Rota runs a live balance requery before any transfer goes out.</p>
+        </div>
+        <div class="flex items-start gap-4 px-4 py-3 bg-[#FAF8F5]">
+          <code class="text-xs font-mono text-[#FF6B00] bg-orange-50 px-2 py-0.5 rounded mt-0.5 shrink-0">COMPLETED</code>
+          <p class="text-sm text-[#1A1A1A] leading-relaxed">All rotation turns have been settled. Every NUBAN in the cycle has been deprovisioned and a final frozen statement has been generated for every participant.</p>
+        </div>
+      </div>
+    </div>
+  `,
+  responseBody: `{
   "cycle_id": "ajo_cyc_01H7X...",
   "cycle_name": "Tech Bros Weekly Contribution",
   "status": "CONTRIBUTING",
@@ -113,6 +165,7 @@ If a single participant fails provisioning (e.g. invalid BVN), Rota does not fai
   "next_settlement_date": "2026-07-08T00:00:00Z",
   "current_beneficiary": "usr_9981a"
 }`
+
   },
   {
     id: "update-participant",
@@ -227,7 +280,7 @@ POST /v1/webhooks/event-logs/sync
 
 You are alerted immediately via a \`payment.quarantined\` webhook containing the amount, the NUBAN it hit, and the reason it was quarantined. From there you choose how to resolve it:
 
-### Resolve a quarantined payment
+Resolve a quarantined payment
 \`\`\`
 POST /v1/quarantine/{id}/resolve
 \`\`\`

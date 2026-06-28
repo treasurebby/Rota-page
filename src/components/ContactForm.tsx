@@ -6,18 +6,34 @@ export default function ContactForm() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) return;
 
     setLoading(true);
-    // Simulate API request
-    setTimeout(() => {
-      setLoading(false);
+    setError("");
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Something went wrong.");
+      }
+
       setSubmitted(true);
       setForm({ name: "", email: "", message: "" });
-    }, 800);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -31,7 +47,7 @@ export default function ContactForm() {
         </p>
 
         {submitted ? (
-          <div className="bg-orange-50 border border-[#FF6B00]/20 rounded-2xl p-8 text-center animate-fade-in">
+          <div className="bg-orange-50 border border-[#FF6B00]/20 rounded-2xl p-8 text-center">
             <div className="w-12 h-12 bg-[#FF6B00]/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -103,6 +119,10 @@ export default function ContactForm() {
                 placeholder="Tell us about your project..."
               />
             </div>
+
+            {error && (
+              <p className="text-xs text-red-500 font-medium">{error}</p>
+            )}
 
             <button
               type="submit"
