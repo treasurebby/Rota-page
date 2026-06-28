@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
+  
+  --color-primary: #FF6B00;
+  --color-cream: #F7F3EC;
+  --color-dark: #1A1A1A;
+  --color-muted: #8A8070;
+  
+  --animate-spin-slow: spin-slow 120s linear infinite;
+  
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-dark);
+}
+
+/* Custom scrollbar for doc content */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E4DEC9;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C4BCAC;
+}
